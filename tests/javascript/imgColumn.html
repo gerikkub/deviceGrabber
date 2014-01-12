@@ -1,0 +1,30 @@
+<html>
+<head>
+<style>
+img
+{
+	border:2px solid;
+	border-color:#A0A0A0;
+	background-color:#C0C0C0;
+	padding:8px;
+	border-radius:20px;
+	float:left;
+	margin:2px;
+	box-shadow:4px 4px 5px #888888;
+}
+</style>
+</head>
+
+<body>
+<script type="text/javascript">
+
+for(var i=1;i<=20;i++){
+	var img = document.write("<img src=\"http://www.saltybet.com/images/ranksmall/rank" + i + ".png\" width=\"40px\" height=\"40px\" id=\"image" + i + "\" >");
+	document.getElementById("image" + i).onclick = function(){
+		alert("You clicked on Image: " + this.id.replace("image",""));
+	}
+}
+
+</script>
+</body>
+<html>

@@ -1,0 +1,57 @@
+<html>
+<head>
+<style>
+img
+{
+	position:absolute;
+
+}
+</style>
+<script type="text/javascript" src="mootools-core-1.4.5-full-nocompat.js"></script>
+<script type="text/javascript" src="mootools-more-1.4.0.1.js"></script>
+</head>
+<body>
+<p id="state"></p>
+<p>X: <div id="xPos"></div></p>
+<p>Y: <div id="yPos"></div></p>
+<img src="https://d3nevzfk7ii3be.cloudfront.net/igi/ZVym3xZncXLlv6He.thumbnail" id="image" >
+
+<script>
+
+var initX;
+var initY;
+
+var drag = new Drag.Move(document.getElementById('image'),{
+	onStart: function(el){
+		document.getElementById("state").innerHTML = "Starting Drag";
+		initX = el.x;
+		initY = el.y;
+	},
+	onDrag: function(el){
+		$('xPos').innerHTML = el.x;
+		$('yPos').innerHTML = el.y;
+	},
+	onComplete: function(el){
+		if(el.x > 300){
+			el.style.left = initX;
+			el.style.top = initY;
+		}
+		$('state').innerHTML = "Drag Completed";
+		$('xPos').innerHTML = el.x;
+		$('yPos').innerHTML = el.y;
+	}
+});
+
+/*document.getElementById("image").onmousedown = function(){
+	var dragInstance = new Drag(this,{
+		onComplete: function(elem){
+			document.getElementById("xPos").innerHTML = elem.x;
+			document.getElementById("yPos").innerHTML = elem.y;
+		}
+	});
+}*/
+
+</script>
+
+</body>
+</html>
