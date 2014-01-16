@@ -1,0 +1,165 @@
+<html>
+<head>
+<style>
+img
+{
+	border:2px solid;
+	border-color:#A0A0A0;
+	background-color:#C0C0C0;
+	padding:8px;
+	border-radius:20px;
+	margin:2px;
+	box-shadow:4px 4px 5px #888888;
+}
+.dragged
+{
+	background-color:#B0B0B0;
+	border-color:#909090;
+}
+#bottomBox
+{
+	border:4px solid;
+	border-color:black;
+	background-color: black;
+	border-bottom:100px;
+	height:100px;
+	width:1500px;
+	bottom: 0px;
+	position: absolute;
+}
+</style>
+<script type="text/javascript" src="mootools-core-1.4.5-full-nocompat.js"></script>
+<script type="text/javascript" src="mootools-more-1.4.0.1.js"></script>
+</head>
+<body onresize="arrangeElements()" onload="arrangeElements()">
+
+<var id="bottomBox" class="droppable" onclick="listElements()"></var>
+</body>
+<script type="text/javascript">
+
+var selectedDevices = new Array();
+
+function listElements(){
+	for(var i=0;i<selectedDevices.length;i++){
+		alert("Contains device " + selectedDevices[i].id.replace("image",""));
+	}
+}
+
+function arrangeElements(){
+	devices = document.getElementsByClassName("device");
+
+	var windowLength;
+	var windowHeight;
+
+	//Assume all images are the same width and height
+	var deviceWidth = devices[0].width;
+	var deviceHeight = devices[0].height;
+
+	var minPadding = 12;
+	var verticalPadding = 12;
+
+	var printWidth;
+	var printHeight;
+
+	var nextX;
+	var nextY;
+
+	windowWidth = window.innerWidth - minPadding/2;
+	windowHeight = window.innerHeight;
+
+	var devicesPerLine = Math.floor((windowWidth) / (deviceWidth + (minPadding * 2)));
+
+	var padding = ((windowWidth/devicesPerLine) - deviceWidth)/2;
+
+	nextX = padding/2;
+	nextY = verticalPadding;
+	
+	printWidth = deviceWidth + padding*2;
+	printHeight = deviceHeight + verticalPadding*2;
+
+	var deviceCount = 0;
+
+	for(var i=0;i<devices.length;i++){
+
+		devices[i].style.top = nextY;
+		devices[i].style.left = nextX;
+		
+		deviceCount++;
+		if(deviceCount % devicesPerLine == 0){
+			nextX = padding/2;
+			nextY += printHeight;
+		} else {
+			nextX += printWidth;
+		}
+
+	}
+
+	//var bottomBox = document.getElementById("bottomBox");
+	//bottomBox.
+	
+}
+
+//true if elem1 contains elem2
+function contains(elem1,elem2){
+	if(!elem1||!elem2) return false;
+	var rect1,rect2;
+	rect1 = elem1.getBoundingClientRect();
+	rect2 = elem2.getBoundingClientRect();
+
+	//alert(rect1.id + ", " + rect1.top + ", " + rect1.left + ", " + rect1.width + ", " + rect1.height);
+
+	if(rect2.left > rect1.left && rect2.left < rect1.left + rect1.width){
+		if(rect2.top > rect1.top && rect2.top < rect2.top + rect1.height){
+			return true;
+		}		
+	}
+	return false;
+}
+
+var initX;
+var initY;
+
+
+for(var i=1;i<=21;i++){
+	var img = document.write("<img src=\"http://www.saltybet.com/images/ranksmall/rank" + i + ".png\" width=\"40px\" height=\"40px\" id=\"image" + i + "\" class=\"device\">");
+	var drag = new Drag.Move($('image' + i),{
+
+		droppables: '.device',
+
+		/*onDrop: function(elem,droppable,ev){
+			if(droppable){
+				elem.remove();
+				alert("Item: " + elem.id.remove("image") + "removed");
+				arrangeElements();
+			} else {
+				alert("Not dropped correctly")
+			}
+		},*/
+
+		/*onEnter: function(elem,droppable){
+			alert("Entered: " + droppable.id);
+		},*/
+
+		onStart: function(elem){
+			initX = elem.x;
+			initY = elem.y;
+			//elem.className = elem.className + "dragged";
+		},
+		onComplete: function(elem){
+			if(contains(document.getElementById("bottomBox"),elem) == true){
+				selectedDevices[selectedDevices.length] = elem;
+				elem.style.visibility = "hidden";
+				elem.className = "";
+				arrangeElements();
+			} else {
+				elem.style.left = initX;
+				elem.style.top = initY;
+			}
+			
+		}
+	});
+}
+
+</script>
+
+</html>
