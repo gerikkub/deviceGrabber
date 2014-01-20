@@ -1,0 +1,63 @@
+<html>
+<head>
+<style>
+img
+{
+	border:2px solid;
+	border-color:#A0A0A0;
+	background-color:#C0C0C0;
+	padding:8px;
+	border-radius:20px;
+	margin:2px;
+	box-shadow:4px 4px 5px #888888;
+}
+
+
+
+</style>
+
+<script>
+
+function topicsCallback(topics){
+	var script;
+	for(var i = 0;i<topics.length;i++){
+		script = document.createElement('script');
+		script.src = "http://www.ifixit.com/api/1.0/topic/" + topics[i].topic.replace(" ","+") + "?jsonp=writeTopic";
+		script.type = "text/javascript";
+		document.getElementById("jsonpScripts").appendChild(script);
+		//document.write("<script src=\"http://www.ifixit.com/api/1.0/topic/" + topics[i].topic.replace(" ","+") + "?jsonp=writeTopic\" />");
+	}
+}
+
+function writeTopic(topic){
+	//if(topic === undefined || topic.image === undefined){
+
+	//} else {
+		var img;
+		img = document.createElement('img');
+		img.src = topic.image.text + ".thumbnail";
+		if(img.src.indexOf("undefined") == -1){
+			document.getElementById("images").appendChild(img);
+		}
+		//document.write("<img src=\"" + topic.image.text + ".thumbnail\" onError=\"brokenImage(this)\">");
+	//}
+}
+
+function brokenImage(img){
+	alert("broken");
+	img.remove();
+}
+
+
+</script>
+
+</head>
+<body>
+
+<div id="jsonpScripts"></div>
+<div id="images"></div>
+
+<script src="http://www.ifixit.com/api/1.0/topics?offset=200&limit=50&jsonp=topicsCallback"></script>
+
+</body>
+</html>

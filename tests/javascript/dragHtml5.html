@@ -1,0 +1,37 @@
+<html>
+<head>
+<script type="text/javascript">
+	function startDrag(ev){
+		ev.dataTransfer.setData("Text",ev.target.id);
+		document.getElementById('state').innerHTML = "Drag Started";
+	}
+
+	function drop(ev){
+		document.getElementById('state').innerHTML = "Item Dropped"
+		var elem = ev.target;
+		elem.style.left = ev.target.x;
+		elem.style.top = ev.target.y;
+	}
+</script>
+<style>
+dropBox
+{
+	width=100px;
+	height=100px;
+	border-style:solid;
+	border-width:2px;
+	border-color:black;
+
+}
+</style>
+</head>
+<body>
+<p id="state"></p>
+<p>X: <div id="xPos"></div></p>
+<p>Y: <div id="yPos"></div></p>
+<img src="https://d3nevzfk7ii3be.cloudfront.net/igi/ZVym3xZncXLlv6He.thumbnail" id="image" draggable="true" ondragstart="startDrag(event)" ondrop="drop(event)">
+<div id="dropBox" ondrop="drop">AAA</div>
+
+
+</body>
+</html>

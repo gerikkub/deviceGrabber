@@ -1,0 +1,205 @@
+<html>
+<head>
+<style>
+img
+{
+	border:2px solid;
+	border-color:#A0A0A0;
+	background-color:#C0C0C0;
+	padding:8px;
+	border-radius:20px;
+	margin:2px;
+	box-shadow:4px 4px 5px #888888;
+}
+#bottomBox
+{
+	border:4px solid;
+	border-color:black;
+	background-color: black;
+	border-bottom:100px;
+	height:100px;
+	left:0px;
+	bottom: 0px;
+	position: absolute;
+	padding: 0px;
+}
+#leftButton
+{
+	position: absolute;
+	left:20px;
+	top:40px;
+}
+#rightButton
+{
+	position: absolute;
+	right:20px;
+	top:40px;
+}
+</style>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="device.js"></script>
+<script>
+
+var devices = new Array();
+var deviceIndex = 0;
+var devicesPerLine;
+
+var initialLoading = true;
+var numItems;
+
+
+function screenResize(){
+	//alert("resizing");
+	document.getElementById("bottomBox").style.width = window.innerWidth;
+	//arrangeElements();
+}
+
+function pageLoaded(){
+	initialLoading = true;
+	screenResize();
+	loadMoreImages(20);
+
+	//while(loadingImages == true);
+	//alert("Arranging Elements");
+	//arrangeElements();
+}
+
+function screenScroll(){
+	alert("Scrolling");
+	arrangeElements();
+}
+
+function arrangeElements(){
+
+	onScreenDevices = document.getElementsByClassName("visible");
+
+	for(var i=0;i<onScreenDevices;i++){
+		onScreenDevices[i].className = "invisible";
+		onScreenDevices[i].parentElement.removeChild(onScreenDevices[i]);
+	}
+
+	//alert(devices[0]);
+
+//	debugger;
+
+	var windowLength;
+	var windowHeight;
+
+	//Assume all images are the same width and height
+	if(devices[0] == undefined) return;
+	var deviceWidth = devices[0].image.width;
+	var deviceHeight = devices[0].image.height;
+
+	var minPadding = 12;
+	var verticalPadding = 12;
+
+	var printWidth;
+	var printHeight;
+
+	var nextX;
+	var nextY;
+
+	windowWidth = window.innerWidth - minPadding/2;
+	windowHeight = window.innerHeight - 100;	//100 is bottom box height
+
+	devicesPerLine = Math.floor((windowWidth) / (deviceWidth + (minPadding * 2)));
+
+	var padding = ((windowWidth/devicesPerLine) - deviceWidth)/2;
+
+	nextX = padding/2;
+	nextY = verticalPadding;
+	
+	printWidth = deviceWidth + padding*2;
+	printHeight = deviceHeight + verticalPadding*2;
+
+	var deviceCount = 0;
+
+	var devicesPerPage = devicesPerLine * (windowHeight / printHeight);
+
+	//Make sure there is enough images
+	while(devices.length < deviceIndex + devicesPerPage){
+		alert("Not enough images!!! " + devices.length + " " + deviceIndex + " " + devicesPerPage);
+		loadMoreImages(30);
+	}
+	var currDevice = deviceIndex;
+	for(var i=0;i<devicesPerPage;i++){
+
+		//Make sure the device is not selected
+		while(currDevice.selected == true);
+
+		devices[currDevice].image.style.top = nextY;
+		devices[currDevice].image.style.left = nextX;
+
+		devices[currDevice].image.className = "visible";
+		document.getElementById("images").appendChild(devices[currDevice].image);
+		//alert("Printing");
+
+		deviceCount++;
+		if(deviceCount % devicesPerLine == 0){
+			nextX = padding/2;
+			nextY += printHeight;
+		} else {
+			nextX += printWidth;
+		}
+
+		currDevice++;
+	}
+	
+}
+
+function topicsCallback(topics){
+	var script;
+	for(var i = 0;i<topics.length;i++){
+		script = document.createElement('script');
+		script.src = "http://www.ifixit.com/api/1.0/topic/" + topics[i].topic.replace(" ","+") + "?jsonp=writeTopic";
+		script.type = "text/javascript";
+		document.getElementById("jsonpScripts").appendChild(script);
+	}
+}
+
+function writeTopic(topic){
+	imagesToLoad--;
+	var img;
+	img = document.createElement('img');
+	img.src = topic.image.text + ".thumbnail";
+	if(img.src.indexOf("undefined") == -1){
+		devices[devices.length] = new Device(img);
+
+	}
+	alert("item Left: " + imagesToLoad);
+	if(imagesToLoad == 0){
+		if(initialLoading == true){
+			arrangeElements();
+		}
+	}
+}
+
+function loadMoreImages(numItems){
+	var script;
+	script = document.createElement('script');
+	script.src = "http://www.ifixit.com/api/1.0/topics?offset=" + devices.length + "&limit=" + numItems + "&jsonp=topicsCallback";
+	script.type = "text/javascript";
+	document.getElementById("jsonpScripts").appendChild(script);
+	loadingImages = true;
+	imagesToLoad = numItems;
+	alert("Images to Load: " + imagesToLoad);
+}
+
+</script>
+
+</head>
+<body onload="pageLoaded()" onresize="screenResize()">
+
+<div id="jsonpScripts"></div>
+<div id="images"></div>
+
+<div id="bottomBox">
+	<input id="leftButton" type="submit" value="Left" onclick="leftButton()" >
+	<input id="rightButton" type="submit" value="Right" onclick="rightButton()" >
+</div>
+
+
+<!-- <script src="http://www.ifixit.com/api/1.0/topics?offset=200&limit=50&jsonp=topicsCallback"></script> -->
+
+</body>
+</html>
