@@ -1,7 +1,8 @@
-var gearDevicesPerPage;
-var gearIndex = 0;
+var gearDevicesPerPage;	//USed for prev and next buttons
+var gearIndex = 0;		//Used as an index to selectedDevices array
 
-
+//Callback for gear icon
+//Toggles the state of the gear window
 function gearClicked(){
 	if(document.getElementById("gearScreen").style.visibility == "visible"){
 		gearRemoveElements();
@@ -20,10 +21,12 @@ function gearClicked(){
 	}
 }
 
+//Removes all currently displayed gears
 function gearRemoveElements(){
 	document.getElementById("gearImages").innerHTML = "";
 }
 
+//Draws gear to the gearbox
 function gearShowElements(index){
 
 	gearRemoveElements();
@@ -57,32 +60,31 @@ function gearShowElements(index){
 	gearDevicesPerPage = gearDevicesPerLine * Math.floor(gearBoxHeight / printHeight);
 
 	for(var i=0;i<gearDevicesPerPage && i<selectedDevices.length;i++){
-		//selectedDevices[i + index].style.top = nextY;
-		//selectedDevices[i + index].style.left = nextX;
 
-		//selectedDevices[i + index].className = "gearOnScreen";
-		//selectedDevices[i + index].style.visibility = "visible";
+		if(selectedDevices[i+index] !== undefined){
 
-		var newElem = document.createElement('img');
-		newElem.src = selectedDevices[i+index];
-		newElem.className = "gearOnScreen";
-		newElem.style.top = nextY;
-		newElem.style.left = nextX;
+			var newElem = document.createElement('img');
+			newElem.src = selectedDevices[i+index];
+			newElem.className = "gearOnScreen";
+			newElem.style.top = nextY;
+			newElem.style.left = nextX;
 
 
-		document.getElementById("gearImages").appendChild(newElem);
-		//console.log("Drawing Device: " + selectedDevices[i + index]);
+			document.getElementById("gearImages").appendChild(newElem);
+			//console.log("Drawing Device: " + selectedDevices[i + index]);
 
-		if((i+1) % gearDevicesPerLine == 0){
-			nextX = padding/2;
-			nextY += printHeight;
-		} else {
-			nextX += printWidth;
+			if((i+1) % gearDevicesPerLine == 0){
+				nextX = padding/2;
+				nextY += printHeight;
+			} else {
+				nextX += printWidth;
+			}
 		}
 	}
 
 }
 
+//Updates gearIndex and redraws gearbox devices
 function gearLeftButton(){
 	gearIndex -= gearDevicesPerPage;
 	if(gearIndex <= 0){
@@ -94,6 +96,7 @@ function gearLeftButton(){
 	gearShowElements(gearIndex);
 }
 
+//Updates gearIndex and redraws gearbox devices
 function gearRightButton(){
 	gearIndex += gearDevicesPerPage;
 	if(gearIndex + gearDevicesPerPage > selectedDevices.length){

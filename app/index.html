@@ -58,6 +58,7 @@ img
 	width: 80px;
 	height: 80px;
 	box-shadow: 0px 0px 0px 0;
+
 }
 .onScreen{
 	z-index: 1;
@@ -68,11 +69,7 @@ img
 }
 #gearScreen
 {
-	position: relative;
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	top: 50px;
+	position: absolute;
 
 	border:6px solid;
 	border-color: black;
@@ -83,6 +80,7 @@ img
 	z-index: 3;
 
 	visibility: hidden;
+	border-radius:25px;
 
 }
 .gearOnScreen{
@@ -96,25 +94,32 @@ img
 <script type="text/javascript" src="device.js"></script>
 <script>
 
-var devices = new Array();
-var selectedDevices = new Array();
-var deviceIndex = 0;
-var devicesPerLine;
-var devicePerPage;
 
-var initialLoading = true;
-var numItems;
+var devices = new Array();			//Holds all devices downloaded so far
+var selectedDevices = new Array();	//Holds all devices that have been placed in the gear box
+var deviceIndex = 0;				//Index into the devices array. Used for displaying devices
+var devicesPerLine;					
+var devicePerPage;					//Used to increase the index with the next and prev buttons
 
-var loadingImages;
+var initialLoading = true;			//Flag for loading
 
-var initX;
-var initY;
+var loadingImages;					//Used to make sure to not update screen while images are loading
 
+var initX;							//X and Y position before moving a device
+var initY;							//Used for MooTools Drag and Drop
+
+
+//Function to initialize the page
 function pageLoaded(){
 
 	loadLocalStorage();
 
 	document.getElementById("leftButton").style.visibility = "hidden";
+	var gearScreen = document.getElementById("gearScreen");
+	gearScreen.style.width = window.innerWidth - 200;
+	gearScreen.style.height = window.innerHeight - 150;
+	gearScreen.style.top = 50;
+	gearScreen.style.left = 100;
 
 	initialLoading = true;
 	document.getElementById("bottomBox").style.width = window.innerWidth;
@@ -123,21 +128,15 @@ function pageLoaded(){
 }
 
 function loadLocalStorage(){
-	if(localStorage.selectedDevices !== undefined ){
-		try {
-			for(var i = 0;i< localStorage.items;i++)
-			selectedDevices[i] = localStorage[i];
-		} catch (err){
-			console.log("LocalStorage Error");
-		}
+	try {
+		for(var i = 0;i< localStorage.items;i++)
+		selectedDevices[i] = localStorage[i];
+	} catch (err){
+		console.log("LocalStorage Error");
 	}
 }
 
-function screenScroll(){
-	alert("Scrolling");
-	arrangeElements();
-}
-
+//Function to display devices on the page
 function arrangeElements(){
 
 	if(loadingImages == true){
@@ -147,6 +146,8 @@ function arrangeElements(){
 
 	//Clear current onscreen images
 	document.getElementById("images").innerHTML = "";
+
+	sleep(3000);
 
 	var windowLength;
 	var windowHeight;
@@ -182,36 +183,35 @@ function arrangeElements(){
 
 	devicesPerPage = devicesPerLine * Math.floor((windowHeight / printHeight));
 
-	//Make sure there is enough images
+	//Make sure there are enough images
 	if(devices.length < deviceIndex + devicesPerPage){
 		console.log("Not enough images!!! " + devices.length + " " + deviceIndex + " " + devicesPerPage);
 		loadMoreImages(10);
 		return;
 	}
-	//console.log(windowHeight + " " + printHeight);
-	//console.log("Drawing " + devicesPerPage + "Images, " + devicesPerLine + " per line");
+
 	var currDevice = deviceIndex;
 	for(var i=0;i<devicesPerPage;i++){
 
 		//Make sure the device is not selected
-		while(devices[currDevice].selected == true){
+		if(devices[currDevice].selected == true){
 			console.log("Skipping: " + devices[currDevice].image.id.replace("image",""));
-			currDevice++;
-		}
-
-		devices[currDevice].image.style.top = nextY;
-		devices[currDevice].image.style.left = nextX;
-
-		devices[currDevice].image.className = "onScreen";
-		document.getElementById("images").appendChild(devices[currDevice].image);
-
-
-		deviceCount++;
-		if(deviceCount % devicesPerLine == 0){
-			nextX = padding/2;
-			nextY += printHeight;
 		} else {
-			nextX += printWidth;
+
+			devices[currDevice].image.style.top = nextY;
+			devices[currDevice].image.style.left = nextX;
+
+			devices[currDevice].image.className = "onScreen";
+			document.getElementById("images").appendChild(devices[currDevice].image);
+
+
+			deviceCount++;
+			if(deviceCount % devicesPerLine == 0){
+				nextX = padding/2;
+				nextY += printHeight;
+			} else {
+				nextX += printWidth;
+			}
 		}
 
 		currDevice++;
@@ -221,6 +221,7 @@ function arrangeElements(){
 	
 }
 
+//Callback used generate API calls for specific devices
 function topicsCallback(topics){
 	var script;
 	for(var i = 0;i<topics.length;i++){
@@ -234,6 +235,7 @@ function topicsCallback(topics){
 	}
 }
 
+//Callback used to create devices from API calls
 function writeTopic(topic){
 	imagesToLoad--;
 	var img;
@@ -256,12 +258,12 @@ function writeTopic(topic){
 	}
 }
 
+//Loads more devices. Starts where last call left off at
 function loadMoreImages(numItems){
 	var script;
 	script = document.createElement('script');
 	script.src = "http://www.ifixit.com/api/1.0/topics?offset=" + (devices.length+100) + "&limit=" + numItems + "&jsonp=topicsCallback";
 	script.type = "text/javascript";
-	script.onError = imgLoadError;
 	document.getElementById("jsonpScripts").appendChild(script);
 	loadingImages = true;
 	imagesToLoad = numItems;
@@ -269,10 +271,7 @@ function loadMoreImages(numItems){
 	setTimeout(function(){loadingImages = false},5000);
 }
 
-function imgLoadError(msg,url,lineNum){
-	console.log("Error loading image!! msg: " + msg + " url: " + url);
-}
-
+//Updates deviceIndex and updates screen
 function leftButton(){
 	deviceIndex -= devicesPerPage;
 	if(deviceIndex <= 0){
@@ -282,6 +281,7 @@ function leftButton(){
 	arrangeElements();
 }
 
+//Similar to above
 function rightButton(){
 	deviceIndex += devicesPerPage;
 	arrangeElements();
@@ -289,6 +289,7 @@ function rightButton(){
 	document.getElementById("leftButton").style.visibility = "visible";
 }
 
+//Delay to help prevent HTTP 429 errors
 function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
@@ -313,11 +314,12 @@ function contains(elem1,elem2){
 	return false;
 }
 
+//Sets up MooTools Drag functionality for onscreen images
 function setupDrag(){
-	images = document.getElementsByClassName("onScreen");
+	var images = document.getElementsByClassName("onScreen");
 	for(var i=0;i<images.length;i++){
-		//try {
-			var drag = new Drag.Move($('device' + (i + deviceIndex)),{
+		try {
+			var drag = new Drag.Move(images[i],{
 
 				onStart: function(elem){
 					initX = elem.x;
@@ -327,14 +329,15 @@ function setupDrag(){
 				onComplete: function(elem){
 					if(contains(document.getElementById("gear"),elem) == true){
 						selectedDevices[selectedDevices.length] = elem.src;
-						//elem.style.visibility = "hidden";
 						console.log("dropped device at: " + findDevice(elem));
 						devices[findDevice(elem)].selected = true;
 
 						localStorage[selectedDevices.length - 1] = selectedDevices[selectedDevices.length - 1];
 						localStorage.items = selectedDevices.length;
 
-						arrangeElements();
+						elem.parentNode.removeChild(elem);
+
+						//arrangeElements();
 
 						
 
@@ -346,12 +349,13 @@ function setupDrag(){
 				}
 			});
 
-		//} catch(err) {
-		//	console.log("Move Error");
-		//}
+		} catch(err) {
+			console.log("Drag Error at i: " + i);
+		}
 	}
 }
 
+//Determines if an image is in the device array
 function inDevice(img){
 	for(var i = 0;i< devices.length;i++){
 		if(img.src == devices[i].image.src){
@@ -361,6 +365,7 @@ function inDevice(img){
 	return false;
 }
 
+//Finds the index of an image in the device array
 function findDevice(img){
 	for(var i = 0;i< devices.length;i++){
 		if(img.src == devices[i].image.src){
@@ -370,6 +375,7 @@ function findDevice(img){
 	return -1;
 }
 
+//Determines if an image is in local storage
 function inLocalStorage(img){
 	for(var i = 0;i < selectedDevices.length;i++){
 		if(img.src == selectedDevices[i]){
@@ -390,15 +396,15 @@ function inLocalStorage(img){
 <div id="images"></div>
 
 <div id="bottomBox">
-	<input id="leftButton" type="submit" value="Left" onclick="leftButton()" >
-	<input id="rightButton" type="submit" value="Right" onclick="rightButton()" >
+	<input id="leftButton" type="submit" value="Previous" onclick="leftButton()" >
+	<input id="rightButton" type="submit" value="Next" onclick="rightButton()" >
 	<img id="gear" src="gear.png" onclick="gearClicked()" >
 </div>
 
 <div id="gearScreen" visibility="hidden">
 	<div id="gearImages"></div>
-	<input id="gearLeftButton"  type="submit" value="LeftGear"  onclick="gearLeftButton()"  >
-	<input id="gearRightButton" type="submit" value="RightGear" onclick="gearRightButton()" >
+	<input id="gearLeftButton"  type="submit" value="Previous"  onclick="gearLeftButton()"  >
+	<input id="gearRightButton" type="submit" value="Next" onclick="gearRightButton()" >
 </div>
 
 </body>
