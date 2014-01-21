@@ -9,7 +9,6 @@ function gearClicked(){
 		document.getElementById("gearRightButton").style.visibility = "hidden";
 		document.getElementById("gearLeftButton").style.visibility = "hidden";
 	} else {
-		console.log("Showing Elements");
 		document.getElementById("gearScreen").style.visibility = "visible";
 		gearShowElements(0);
 		if(gearDevicesPerPage >= selectedDevices.length){
@@ -57,17 +56,22 @@ function gearShowElements(index){
 
 	gearDevicesPerPage = gearDevicesPerLine * Math.floor(gearBoxHeight / printHeight);
 
-	console.log(gearDevicesPerLine + " " + gearBoxHeight + " " + printHeight);
-	console.log(gearDevicesPerPage + " " + selectedDevices.length);
-
 	for(var i=0;i<gearDevicesPerPage && i<selectedDevices.length;i++){
-		selectedDevices[i + index].style.top = nextY;
-		selectedDevices[i + index].style.left = nextX;
+		//selectedDevices[i + index].style.top = nextY;
+		//selectedDevices[i + index].style.left = nextX;
 
-		selectedDevices[i + index].className = "gearOnScreen";
-		selectedDevices[i + index].style.visibility = "visible";
-		document.getElementById("gearImages").appendChild(selectedDevices[i+index]);
-		console.log("Draw Device: " + selectedDevices[i + index]);
+		//selectedDevices[i + index].className = "gearOnScreen";
+		//selectedDevices[i + index].style.visibility = "visible";
+
+		var newElem = document.createElement('img');
+		newElem.src = selectedDevices[i+index];
+		newElem.className = "gearOnScreen";
+		newElem.style.top = nextY;
+		newElem.style.left = nextX;
+
+
+		document.getElementById("gearImages").appendChild(newElem);
+		//console.log("Drawing Device: " + selectedDevices[i + index]);
 
 		if((i+1) % gearDevicesPerLine == 0){
 			nextX = padding/2;

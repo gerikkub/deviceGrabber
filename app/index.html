@@ -72,8 +72,7 @@ img
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
-	margin-top: auto;
-	margin-bottom: auto;
+	top: 50px;
 
 	border:6px solid;
 	border-color: black;
@@ -113,12 +112,25 @@ var initY;
 
 function pageLoaded(){
 
+	loadLocalStorage();
+
 	document.getElementById("leftButton").style.visibility = "hidden";
 
 	initialLoading = true;
 	document.getElementById("bottomBox").style.width = window.innerWidth;
 	loadMoreImages(20);
 
+}
+
+function loadLocalStorage(){
+	if(localStorage.selectedDevices !== undefined ){
+		try {
+			for(var i = 0;i< localStorage.items;i++)
+			selectedDevices[i] = localStorage[i];
+		} catch (err){
+			console.log("LocalStorage Error");
+		}
+	}
 }
 
 function screenScroll(){
@@ -182,7 +194,10 @@ function arrangeElements(){
 	for(var i=0;i<devicesPerPage;i++){
 
 		//Make sure the device is not selected
-		while(currDevice.selected == true);
+		while(devices[currDevice].selected == true){
+			console.log("Skipping: " + devices[currDevice].image.id.replace("image",""));
+			currDevice++;
+		}
 
 		devices[currDevice].image.style.top = nextY;
 		devices[currDevice].image.style.left = nextX;
@@ -228,6 +243,9 @@ function writeTopic(topic){
 	if(img.src.indexOf("undefined") == -1){
 		if(inDevice(img) == false){
 			devices[devices.length] = new Device(img);
+			if(inLocalStorage(img) == true){
+				devices[devices.length-1].selected = true;
+			}
 		}
 	}
 	if(imagesToLoad == 0){
@@ -241,7 +259,7 @@ function writeTopic(topic){
 function loadMoreImages(numItems){
 	var script;
 	script = document.createElement('script');
-	script.src = "http://www.ifixit.com/api/1.0/topics?offset=" + devices.length + "&limit=" + numItems + "&jsonp=topicsCallback";
+	script.src = "http://www.ifixit.com/api/1.0/topics?offset=" + (devices.length+100) + "&limit=" + numItems + "&jsonp=topicsCallback";
 	script.type = "text/javascript";
 	script.onError = imgLoadError;
 	document.getElementById("jsonpScripts").appendChild(script);
@@ -308,10 +326,17 @@ function setupDrag(){
 				},
 				onComplete: function(elem){
 					if(contains(document.getElementById("gear"),elem) == true){
-						selectedDevices[selectedDevices.length] = elem;
-						elem.style.visibility = "hidden";
+						selectedDevices[selectedDevices.length] = elem.src;
+						//elem.style.visibility = "hidden";
+						console.log("dropped device at: " + findDevice(elem));
+						devices[findDevice(elem)].selected = true;
 
-						devices[findDevice(elem)].image.selected;
+						localStorage[selectedDevices.length - 1] = selectedDevices[selectedDevices.length - 1];
+						localStorage.items = selectedDevices.length;
+
+						arrangeElements();
+
+						
 
 					} else {
 						elem.style.top = initY;
@@ -343,6 +368,15 @@ function findDevice(img){
 		}
 	}
 	return -1;
+}
+
+function inLocalStorage(img){
+	for(var i = 0;i < selectedDevices.length;i++){
+		if(img.src == selectedDevices[i]){
+			return true;
+		}
+	}
+	return false;
 }
 
 
