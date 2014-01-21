@@ -35,6 +35,18 @@ img
 	right:20px;
 	top:40px;
 }
+#gearLeftButton
+{
+	position: absolute;
+	left:20px;
+	bottom:20px;
+}
+#gearRightButton
+{
+	position: absolute;
+	right:20px;
+	bottom:20px;
+}
 #gear
 {
 	display: block;
@@ -52,11 +64,35 @@ img
 }
 .dragged
 {
-	z-index: 5;
+	z-index: 2;
+}
+#gearScreen
+{
+	position: relative;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: auto;
+	margin-bottom: auto;
+
+	border:6px solid;
+	border-color: black;
+	background-color: white;
+	height: 500px;
+	width: 500px;
+
+	z-index: 3;
+
+	visibility: hidden;
+
+}
+.gearOnScreen{
+	z-index: 4;
 }
 </style>
 <script type="text/javascript" src="mootools-core-1.4.5-full-nocompat.js"></script>
 <script type="text/javascript" src="mootools-more-1.4.0.1.js"></script>
+<script type="text/javascript" src="gear.js"></script>
 <!-- <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script> -->
 <script type="text/javascript" src="device.js"></script>
 <script>
@@ -76,6 +112,9 @@ var initX;
 var initY;
 
 function pageLoaded(){
+
+	document.getElementById("leftButton").style.visibility = "hidden";
+
 	initialLoading = true;
 	document.getElementById("bottomBox").style.width = window.innerWidth;
 	loadMoreImages(20);
@@ -218,8 +257,9 @@ function imgLoadError(msg,url,lineNum){
 
 function leftButton(){
 	deviceIndex -= devicesPerPage;
-	if(deviceIndex < 0){
+	if(deviceIndex <= 0){
 		deviceIndex = 0;
+		document.getElementById("leftButton").style.visibility = "hidden";
 	}
 	arrangeElements();
 }
@@ -227,6 +267,8 @@ function leftButton(){
 function rightButton(){
 	deviceIndex += devicesPerPage;
 	arrangeElements();
+
+	document.getElementById("leftButton").style.visibility = "visible";
 }
 
 function sleep(milliseconds) {
@@ -268,6 +310,9 @@ function setupDrag(){
 					if(contains(document.getElementById("gear"),elem) == true){
 						selectedDevices[selectedDevices.length] = elem;
 						elem.style.visibility = "hidden";
+
+						devices[findDevice(elem)].image.selected;
+
 					} else {
 						elem.style.top = initY;
 						elem.style.left = initX;
@@ -291,6 +336,15 @@ function inDevice(img){
 	return false;
 }
 
+function findDevice(img){
+	for(var i = 0;i< devices.length;i++){
+		if(img.src == devices[i].image.src){
+			return i;
+		}
+	}
+	return -1;
+}
+
 
 
 </script>
@@ -305,6 +359,12 @@ function inDevice(img){
 	<input id="leftButton" type="submit" value="Left" onclick="leftButton()" >
 	<input id="rightButton" type="submit" value="Right" onclick="rightButton()" >
 	<img id="gear" src="gear.png" onclick="gearClicked()" >
+</div>
+
+<div id="gearScreen" visibility="hidden">
+	<div id="gearImages"></div>
+	<input id="gearLeftButton"  type="submit" value="LeftGear"  onclick="gearLeftButton()"  >
+	<input id="gearRightButton" type="submit" value="RightGear" onclick="gearRightButton()" >
 </div>
 
 </body>
